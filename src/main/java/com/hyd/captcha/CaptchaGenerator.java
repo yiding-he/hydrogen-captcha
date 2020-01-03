@@ -3,6 +3,7 @@ package com.hyd.captcha;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.security.SecureRandom;
@@ -17,6 +18,14 @@ public class CaptchaGenerator {
 
     public static java.util.List<BufferedImage> getCharImages() {
         return CHAR_IMAGE_LIST.get();
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    private CharPropertyFactory charPropertyFactory = new DefaultCharPropertyFactory();
+
+    public void setCharPropertyFactory(CharPropertyFactory charPropertyFactory) {
+        this.charPropertyFactory = charPropertyFactory;
     }
 
     public BufferedImage generate(int width, int height, String content) {
@@ -34,24 +43,14 @@ public class CaptchaGenerator {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
 
         java.util.List<BufferedImage> charImages = new ArrayList<>();
-        int lastX = -4;
 
         for (int i = 0; i < chars.length; i++) {
             char aChar = chars[i];
-
             BufferedImage charImage = generateCharImage(aChar, font, frc);
 
-            int x = (int) (cellWidth * (i + 0.5));
-            int y = (height - charImage.getHeight()) / 2;
+            int[] pos = adjustCharPosition(height, cellWidth, i, charImage);
 
-            x += RANDOM.nextInt(cellWidth) - (cellWidth / 2);
-            y += random(-y + 1, height - charImage.getHeight() - 1 - y);
-
-            x = Math.max(x, lastX + (cellWidth * 2 / 3));
-            lastX = x;
-
-            g.drawImage(charImage, x, y, charImage.getWidth(), charImage.getHeight(), null);
-
+            g.drawImage(charImage, pos[0], pos[1], charImage.getWidth(), charImage.getHeight(), null);
             charImages.add(charImage);
         }
 
@@ -59,32 +58,86 @@ public class CaptchaGenerator {
         return bufferedImage;
     }
 
+    private int[] adjustCharPosition(int height, int cellWidth, int i, BufferedImage charImage) {
+        int hCenter = cellWidth * (i + 1);
+        hCenter = random(hCenter - cellWidth / 4, hCenter + cellWidth / 4);
+
+        int vCenter = random(charImage.getHeight() * 2 / 3, height - (charImage.getHeight() * 2 / 3));
+
+        return new int[]{
+            hCenter - charImage.getWidth() / 2,
+            vCenter - charImage.getHeight() / 2
+        };
+    }
+
     private int random(int min, int max) {
         return RANDOM.nextInt(max - min + 1) + min;
+    }
+
+    private static AffineTransform translate(double x, double y) {
+        AffineTransform transform = new AffineTransform();
+        transform.translate(x, y);
+        return transform;
+    }
+
+    private Shape resetPosition(Shape shape) {
+        AffineTransform transform = translate(-shape.getBounds().x, -shape.getBounds().y);
+        return transform.createTransformedShape(shape);
+    }
+
+    private Shape apply(Shape shape, AffineTransform transform) {
+        return resetPosition(transform.createTransformedShape(shape));
     }
 
     private BufferedImage generateCharImage(char aChar, Font font, FontRenderContext frc) {
         char[] aCharArr = {aChar};
 
-        TextLayout textLayout = new TextLayout(new String(aCharArr), font, frc);
-        Shape outline = textLayout.getOutline(null);
+        CharProperty charProperty = charPropertyFactory.getCharProperty(aChar);
 
-        Rectangle2D bounds = outline.getBounds();
+        Shape charShape = new TextLayout(new String(aCharArr), font, frc).getOutline(null);
+        charShape = resetPosition(charShape);
+
+        //////////////////////////////////////////////////////////////
+
+        if (charProperty.getRotate() != 0) {
+            AffineTransform transform = new AffineTransform();
+            Rectangle bounds = charShape.getBounds();
+            if (charProperty.getRotate() > 0) {
+                transform.translate(bounds.getHeight() * Math.abs(Math.sin(charProperty.getRotate())), 0);
+            } else {
+                transform.translate(0, bounds.getWidth() * Math.abs(Math.sin(charProperty.getRotate())));
+            }
+            transform.rotate(charProperty.getRotate());
+            charShape = apply(charShape, transform);
+        }
+
+        if (charProperty.getShear() != null) {
+            AffineTransform transform = new AffineTransform();
+            transform.shear(charProperty.getShear()[0], charProperty.getShear()[1]);
+            charShape = apply(charShape, transform);
+        }
+
+        //////////////////////////////////////////////////////////////
+
         BufferedImage image = new BufferedImage(
-                (int) bounds.getWidth() + 2, (int)bounds.getHeight() + 2, BufferedImage.TYPE_INT_ARGB
+            charShape.getBounds().width + 2, charShape.getBounds().height + 2, BufferedImage.TYPE_INT_ARGB
         );
 
         Graphics2D g = (Graphics2D) image.getGraphics();
-        g.translate(-bounds.getX() + 1, -bounds.getY() + 1);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
         g.setComposite(AlphaComposite.Clear);
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
         g.setComposite(AlphaComposite.Src);
 
-        g.setColor(Color.BLACK);
-        g.draw(outline);
+        if (charProperty.getStrikePaint() != null) {
+            g.setPaint(charProperty.getStrikePaint());
+            g.draw(charShape);
+        }
+
+        if (charProperty.getFillPaint() != null) {
+            g.setPaint(charProperty.getFillPaint());
+            g.fill(charShape);
+        }
 
         return image;
     }

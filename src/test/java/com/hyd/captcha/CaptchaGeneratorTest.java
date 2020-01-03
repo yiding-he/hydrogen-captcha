@@ -15,20 +15,15 @@ public class CaptchaGeneratorTest extends JFrame {
         JPanel charImagePanel = new JPanel();
 
         Runnable displayImage = () -> {
-            BufferedImage bufferedImage = captchaGenerator.generate(250, 70, "captcha123456");
+            BufferedImage bufferedImage = captchaGenerator.generate(250, 70, "captcha12345");
             imageLabel.setIcon(new ImageIcon(bufferedImage));
 
             List<BufferedImage> charImages = CaptchaGenerator.getCharImages();
             charImagePanel.removeAll();
             charImages.forEach(charImage -> charImagePanel.add(imageLabel(charImage)));
+            charImagePanel.revalidate();
+            charImagePanel.repaint();
         };
-
-        imageLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                displayImage.run();
-            }
-        });
 
         CaptchaGeneratorTest frame = new CaptchaGeneratorTest();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -39,6 +34,13 @@ public class CaptchaGeneratorTest extends JFrame {
 
         charImagePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         frame.getContentPane().add(charImagePanel, BorderLayout.NORTH);
+
+        JButton button = new JButton("刷新");
+        button.addActionListener(e -> displayImage.run());
+        JPanel buttonsPanel = new JPanel();
+        buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        buttonsPanel.add(button);
+        frame.getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
 
         frame.setLocation(500, 300);
         frame.addWindowListener(new WindowAdapter() {
