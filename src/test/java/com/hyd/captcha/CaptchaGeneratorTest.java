@@ -9,7 +9,10 @@ import javax.swing.*;
 
 public class CaptchaGeneratorTest extends JFrame {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+
+        FontRepository.loadFonts("./sample-fonts/");
+
         CaptchaGenerator captchaGenerator = new CaptchaGenerator();
         JLabel imageLabel = new JLabel();
         JPanel charImagePanel = new JPanel();

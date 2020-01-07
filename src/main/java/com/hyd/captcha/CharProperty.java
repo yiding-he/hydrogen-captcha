@@ -1,8 +1,10 @@
 package com.hyd.captcha;
 
-import java.awt.Paint;
+import java.awt.*;
 
 public class CharProperty {
+
+    private Font font;
 
     private Paint fillPaint;
 
@@ -11,6 +13,14 @@ public class CharProperty {
     private double[] shear;
 
     private double rotate;
+
+    public Font getFont() {
+        return font;
+    }
+
+    public void setFont(Font font) {
+        this.font = font;
+    }
 
     public Paint getFillPaint() {
         return fillPaint;

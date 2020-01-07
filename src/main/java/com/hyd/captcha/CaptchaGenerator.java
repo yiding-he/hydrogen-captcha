@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -33,8 +32,7 @@ public class CaptchaGenerator {
         char[] chars = content.toCharArray();
 
         int cellWidth = width / (chars.length + 1);
-        int charWidth = (int) (height * 0.5);
-        Font font = new Font("Impact", Font.PLAIN, charWidth);
+        int charWidth = (int) (height * 0.7);
 
         FontRenderContext frc = new FontRenderContext(null, false, false);
         Graphics2D g = (Graphics2D) bufferedImage.getGraphics();
@@ -46,7 +44,7 @@ public class CaptchaGenerator {
 
         for (int i = 0; i < chars.length; i++) {
             char aChar = chars[i];
-            BufferedImage charImage = generateCharImage(aChar, font, frc);
+            BufferedImage charImage = generateCharImage(aChar, charWidth, frc);
 
             int[] pos = adjustCharPosition(height, cellWidth, i, charImage);
 
@@ -89,10 +87,12 @@ public class CaptchaGenerator {
         return resetPosition(transform.createTransformedShape(shape));
     }
 
-    private BufferedImage generateCharImage(char aChar, Font font, FontRenderContext frc) {
+    private BufferedImage generateCharImage(char aChar, int fontSize, FontRenderContext frc) {
         char[] aCharArr = {aChar};
 
         CharProperty charProperty = charPropertyFactory.getCharProperty(aChar);
+        Font font = charProperty.getFont().deriveFont((float) fontSize);
+        System.out.println("'" + aChar + "' : " + font.getFontName());
 
         Shape charShape = new TextLayout(new String(aCharArr), font, frc).getOutline(null);
         charShape = resetPosition(charShape);
@@ -125,6 +125,7 @@ public class CaptchaGenerator {
 
         Graphics2D g = (Graphics2D) image.getGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.setComposite(AlphaComposite.Clear);
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
         g.setComposite(AlphaComposite.Src);
