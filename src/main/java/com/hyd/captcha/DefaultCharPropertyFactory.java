@@ -20,7 +20,7 @@ public class DefaultCharPropertyFactory implements CharPropertyFactory {
     public CharProperty getCharProperty(char ch) {
         CharProperty charProperty = new CharProperty();
         charProperty.setFillPaint(null);
-        charProperty.setStrikePaint(new Color(random(0, 255), random(0, 255), random(0, 255)));
+        charProperty.setStrikePaint(new Color(random(100, 255), random(100, 255), random(100, 255)));
         charProperty.setFillPaint(new Color(random(0, 150), random(0, 150), random(0, 150)));
         charProperty.setRotate(random(-Math.PI / 6, Math.PI / 6));
         charProperty.setShear(new double[]{0, random(-0.25, 0.25)});
