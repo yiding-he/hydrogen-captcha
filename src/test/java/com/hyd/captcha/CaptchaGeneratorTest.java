@@ -1,8 +1,8 @@
 package com.hyd.captcha;
 
-import com.hyd.captcha.background.CrossBackgroundFilter;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import com.hyd.captcha.background.CrossFilter;
+import com.hyd.captcha.background.GradientBackground;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.security.SecureRandom;
@@ -15,28 +15,41 @@ public class CaptchaGeneratorTest extends JFrame {
 
     public static void main(String[] args) throws Exception {
 
-        FontRepository.loadFont("./sample-fonts/RobotoSlab.ttf");
-        // FontRepository.loadFonts("./sample-fonts/");
+        FontRepository.loadFont("./sample-fonts/RobotoSlab.ttf");  // load single font
+        // FontRepository.loadFonts("./sample-fonts/");            // load multiple fonts
 
         CaptchaGenerator captchaGenerator = new CaptchaGenerator();
-        captchaGenerator.addBackgroundPainter(new CrossBackgroundFilter());
+        captchaGenerator.setBackground(new GradientBackground(true));
+        captchaGenerator.addBackgroundFilter(new CrossFilter(10, 1, true));
+        captchaGenerator.addBackgroundFilter(new CrossFilter(10, 1, false));
+        captchaGenerator.addCharImageFilter(new CrossFilter(10, 1, true));
+
+        captchaGenerator.setCharImageListener(
+            (ch, font, bufferedImage) -> System.out.println(ch + ", " + font.getFontName())
+        );
+
+        int captchaWidth = 250;
+        int captchaHeight = 70;
+        int captchaLength = 8;
+        String captchaChars = "ADEFGHJKLMNPRTUVWXY34678";
+
+        //////////////////////////////////////////////////////////////
 
         JLabel imageLabel = new JLabel();
         JPanel charImagePanel = new JPanel();
 
         Function<Integer, String> randStrGenerator = size -> {
             Random random = new SecureRandom();
-            String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < size; i++) {
-                sb.append(chars.charAt(random.nextInt(chars.length())));
+                sb.append(captchaChars.charAt(random.nextInt(captchaChars.length())));
             }
             return sb.toString();
         };
 
         Runnable displayImage = () -> {
-            String str = randStrGenerator.apply(6);
-            BufferedImage bufferedImage = captchaGenerator.generate(250, 70, str);
+            String str = randStrGenerator.apply(captchaLength);
+            BufferedImage bufferedImage = captchaGenerator.generate(captchaWidth, captchaHeight, str);
             imageLabel.setIcon(new ImageIcon(bufferedImage));
 
             List<BufferedImage> charImages = CaptchaGenerator.getCharImages();
@@ -44,11 +57,14 @@ public class CaptchaGeneratorTest extends JFrame {
             charImages.forEach(charImage -> charImagePanel.add(imageLabel(charImage)));
             charImagePanel.revalidate();
             charImagePanel.repaint();
+
+            System.out.println();
         };
 
         CaptchaGeneratorTest frame = new CaptchaGeneratorTest();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(400, 300);
+        frame.setTitle("Captcha Image Samples");
 
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(imageLabel, BorderLayout.CENTER);
@@ -56,7 +72,7 @@ public class CaptchaGeneratorTest extends JFrame {
         charImagePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         frame.getContentPane().add(charImagePanel, BorderLayout.NORTH);
 
-        JButton button = new JButton("刷新");
+        JButton button = new JButton("Refresh");
         button.addActionListener(e -> displayImage.run());
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));

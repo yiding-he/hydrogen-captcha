@@ -1,7 +1,6 @@
 package com.hyd.captcha;
 
-import com.hyd.captcha.background.BackgroundPainter;
-import com.hyd.captcha.background.GradientLinesBackgroundPainter;
+import com.hyd.captcha.background.*;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
@@ -33,23 +32,45 @@ public class CaptchaGenerator {
 
     private CharPropertyFactory charPropertyFactory = new DefaultCharPropertyFactory();
 
-    private List<BackgroundPainter> backgroundPainters = new ArrayList<>(
-        Collections.singletonList(new GradientLinesBackgroundPainter())
+    private ImageOperator background;
+
+    private List<ImageOperator> backgroundFilters = new ArrayList<>(
     );
 
-    public void addBackgroundPainter(BackgroundPainter backgroundPainter) {
-        this.backgroundPainters.add(backgroundPainter);
+    private List<ImageOperator> charImageFilters = new ArrayList<>(
+    );
+
+    private CharImageListener charImageListener;
+
+    public void setCharImageListener(CharImageListener charImageListener) {
+        this.charImageListener = charImageListener;
+    }
+
+    public void setBackground(ImageOperator background) {
+        this.background = background;
+    }
+
+    public void addBackgroundFilter(ImageOperator imageOperator) {
+        this.backgroundFilters.add(imageOperator);
+    }
+
+    public void addCharImageFilter(ImageOperator imageOperator) {
+        this.charImageFilters.add(imageOperator);
     }
 
     public void setCharPropertyFactory(CharPropertyFactory charPropertyFactory) {
         this.charPropertyFactory = charPropertyFactory;
     }
 
+    //////////////////////////////////////////////////////////////
+
     public BufferedImage generate(int width, int height, String content) {
 
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = (Graphics2D) bufferedImage.getGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
 
         drawBackground(bufferedImage, g);
 
@@ -61,7 +82,10 @@ public class CaptchaGenerator {
     }
 
     private void drawBackground(BufferedImage bufferedImage, Graphics2D g) {
-        this.backgroundPainters.forEach(p -> p.paint(bufferedImage, g));
+        if (this.background != null) {
+            this.background.paint(bufferedImage, g);
+            this.backgroundFilters.forEach(p -> p.paint(bufferedImage, g));
+        }
     }
 
     private void drawChars(
@@ -90,9 +114,7 @@ public class CaptchaGenerator {
     private int[] adjustCharPosition(int height, int cellWidth, int i, BufferedImage charImage) {
         int left = cellWidth * (i + 1);
         left = random(left - cellWidth / 8, left + cellWidth / 8) - charImage.getWidth() / 2;
-
         int top = random(height / 8, height * 7 / 8 - charImage.getHeight());
-
         return new int[]{left, top};
     }
 
@@ -143,19 +165,18 @@ public class CaptchaGenerator {
         //////////////////////////////////////////////////////////////
 
         BufferedImage image = new BufferedImage(
-            charShape.getBounds().width + (fontSize / 5), charShape.getBounds().height + (fontSize / 5),
+            charShape.getBounds().width + (fontSize / 4), charShape.getBounds().height + (fontSize / 4),
             BufferedImage.TYPE_INT_ARGB
         );
 
         Graphics2D g = (Graphics2D) image.getGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.setComposite(AlphaComposite.Clear);
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
         g.setComposite(AlphaComposite.Src);
 
         if (charProperty.getStrikePaint() != null) {
-            g.translate(5, 5);
+            g.translate(2, 2);
             g.setPaint(charProperty.getStrikePaint());
             g.setStroke(new BasicStroke(4));
             g.draw(charShape);
@@ -164,6 +185,14 @@ public class CaptchaGenerator {
         if (charProperty.getFillPaint() != null) {
             g.setPaint(charProperty.getFillPaint());
             g.fill(charShape);
+        }
+
+        for (ImageOperator operator : charImageFilters) {
+            operator.paint(image, g);
+        }
+
+        if (charImageListener != null) {
+            charImageListener.charImageGenerated(aChar, font, image);
         }
 
         return image;
