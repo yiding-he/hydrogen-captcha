@@ -1,19 +1,8 @@
 package com.hyd.captcha;
 
-import java.security.SecureRandom;
-import java.util.Random;
+import static com.hyd.captcha.CaptchaGenerator.random;
 
 public class DefaultCharPropertyFactory implements CharPropertyFactory {
-
-    private static final Random RANDOM = new SecureRandom();
-
-    private static double random(double min, double max) {
-        return RANDOM.nextDouble() * (max - min) + min;
-    }
-
-    private static int random(int min, int max) {
-        return RANDOM.nextInt(max - min + 1) + min;
-    }
 
     @Override
     public CharProperty getCharProperty(char ch) {

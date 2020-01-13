@@ -5,10 +5,12 @@ import com.hyd.captcha.background.GradientBackground;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.nio.Buffer;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.swing.*;
 
 public class CaptchaGeneratorTest extends JFrame {
@@ -33,23 +35,19 @@ public class CaptchaGeneratorTest extends JFrame {
         int captchaLength = 8;
         String captchaChars = "ADEFGHJKLMNPRTUVWXY34678";
 
+        // How to create captcha image
+        Supplier<BufferedImage> generateCaptcha = () -> {
+            String str = generateRandomString(captchaChars, captchaLength);
+            return captchaGenerator.generate(captchaWidth, captchaHeight, str);
+        };
+
         //////////////////////////////////////////////////////////////
 
         JLabel imageLabel = new JLabel();
         JPanel charImagePanel = new JPanel();
 
-        Function<Integer, String> randStrGenerator = size -> {
-            Random random = new SecureRandom();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < size; i++) {
-                sb.append(captchaChars.charAt(random.nextInt(captchaChars.length())));
-            }
-            return sb.toString();
-        };
-
         Runnable displayImage = () -> {
-            String str = randStrGenerator.apply(captchaLength);
-            BufferedImage bufferedImage = captchaGenerator.generate(captchaWidth, captchaHeight, str);
+            BufferedImage bufferedImage = generateCaptcha.get();
             imageLabel.setIcon(new ImageIcon(bufferedImage));
 
             List<BufferedImage> charImages = CaptchaGenerator.getCharImages();
@@ -87,6 +85,15 @@ public class CaptchaGeneratorTest extends JFrame {
             }
         });
         frame.setVisible(true);
+    }
+
+    private static String generateRandomString(String captchaChars, Integer size) {
+        Random random = new SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            sb.append(captchaChars.charAt(random.nextInt(captchaChars.length())));
+        }
+        return sb.toString();
     }
 
     private static JLabel imageLabel(BufferedImage bufferedImage) {
