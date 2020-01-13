@@ -1,5 +1,6 @@
 # hydrogen-captcha
 [WIP] Captha Image Generator
 
-![rlO1Uauh84](https://user-images.githubusercontent.com/900606/72231821-63c15e80-35f8-11ea-9c5c-bc2b2072e623.gif)
+![screenshot](https://user-images.githubusercontent.com/900606/72231834-7f2c6980-35f8-11ea-8bb1-da819a3d8ca6.png)
+
 
