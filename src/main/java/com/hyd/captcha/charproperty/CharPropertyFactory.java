@@ -1,4 +1,4 @@
-package com.hyd.captcha;
+package com.hyd.captcha.charproperty;
 
 public interface CharPropertyFactory {
 

@@ -12,6 +12,10 @@ public class ImageUtil {
         return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
     }
 
+    public static Color randomColor() {
+        return randomColor(0, 255);
+    }
+
     public static Color randomColor(int minGray, int maxGray) {
         int r = CaptchaGenerator.random(0, 255);
         int g = CaptchaGenerator.random(0, 255);

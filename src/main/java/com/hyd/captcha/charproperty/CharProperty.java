@@ -1,7 +1,10 @@
-package com.hyd.captcha;
+package com.hyd.captcha.charproperty;
 
 import java.awt.*;
 
+/**
+ * Properties for tuning a single character.
+ */
 public class CharProperty {
 
     private Font font;
@@ -10,9 +13,22 @@ public class CharProperty {
 
     private Paint strikePaint;
 
+    private int strikeWidth;
+
+    /**
+     * Horizontal shear and vertical shear.
+     */
     private double[] shear;
 
     private double rotate;
+
+    public int getStrikeWidth() {
+        return strikeWidth;
+    }
+
+    public void setStrikeWidth(int strikeWidth) {
+        this.strikeWidth = strikeWidth;
+    }
 
     public Font getFont() {
         return font;

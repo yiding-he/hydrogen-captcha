@@ -1,8 +1,13 @@
 package com.hyd.captcha.background;
 
 import static com.hyd.captcha.CaptchaGenerator.random;
+import static com.hyd.captcha.ImageUtil.randomColor;
 
-import java.awt.*;
+import com.hyd.captcha.ImageOperator;
+import java.awt.BasicStroke;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.image.BufferedImage;
 
 public class GradientBackground implements ImageOperator {
@@ -24,18 +29,24 @@ public class GradientBackground implements ImageOperator {
         g.setStroke(new BasicStroke(stroke));
 
         for (int i = 0; i < 200; i++) {
-            if (gradient) {
-                g.setPaint(new GradientPaint(
-                    x1, y1, new Color(random(0, 255), random(0, 255), random(0, 255)),
-                    x2, y2, new Color(random(0, 255), random(0, 255), random(0, 255))
-                ));
-            } else {
-                g.setPaint(new Color(random(0, 255), random(0, 255), random(0, 255)));
-            }
+            g.setPaint(createPaint(y1, y2, x1, x2));
             g.drawLine(x1, y1, x2, y2);
             x1 = random(xmin, xmax);
             x2 = random(xmin, xmax);
         }
 
+    }
+
+    private Paint createPaint(int y1, int y2, int x1, int x2) {
+        Paint paint;
+        if (gradient) {
+            paint = new GradientPaint(
+                x1, y1, randomColor(),
+                x2, y2, randomColor()
+            );
+        } else {
+            paint = randomColor();
+        }
+        return paint;
     }
 }

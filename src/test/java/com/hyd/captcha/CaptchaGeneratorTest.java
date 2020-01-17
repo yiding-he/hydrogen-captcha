@@ -1,15 +1,15 @@
 package com.hyd.captcha;
 
-import com.hyd.captcha.background.CrossFilter;
+import com.hyd.captcha.background.CirclesBackground;
+import com.hyd.captcha.charproperty.DefaultCharPropertyFactory;
+import com.hyd.captcha.filter.CrossFilter;
 import com.hyd.captcha.background.GradientBackground;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.nio.Buffer;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.swing.*;
 
@@ -17,15 +17,21 @@ public class CaptchaGeneratorTest extends JFrame {
 
     public static void main(String[] args) throws Exception {
 
-        FontRepository.loadFont("./sample-fonts/RobotoSlab.ttf");  // load single font
-        // FontRepository.loadFonts("./sample-fonts/");            // load multiple fonts
+        // FontRepository.loadFont("./sample-fonts/RobotoSlab.ttf");  // load single font
+        FontRepository.loadFonts("./sample-fonts/");            // load multiple fonts
 
         CaptchaGenerator captchaGenerator = new CaptchaGenerator();
-        captchaGenerator.setBackground(new GradientBackground(true));
-        captchaGenerator.addBackgroundFilter(new CrossFilter(10, 1, true));
-        captchaGenerator.addBackgroundFilter(new CrossFilter(10, 1, false));
-        captchaGenerator.addCharImageFilter(new CrossFilter(10, 1, true));
+        // captchaGenerator.setBackground(new GradientBackground(true));
+        captchaGenerator.setBackground(new CirclesBackground());
 
+        // captchaGenerator.addBackgroundFilter(new CrossFilter(10, 1, true));
+        // captchaGenerator.addBackgroundFilter(new CrossFilter(10, 1, false));
+
+        captchaGenerator.setCharPropertyFactory(
+            new DefaultCharPropertyFactory()
+        );
+
+        // captchaGenerator.addCharImageFilter(new CrossFilter(10, 1, true));
         captchaGenerator.setCharImageListener(
             (ch, font, bufferedImage) -> System.out.println(ch + ", " + font.getFontName())
         );
@@ -33,7 +39,7 @@ public class CaptchaGeneratorTest extends JFrame {
         int captchaWidth = 250;
         int captchaHeight = 70;
         int captchaLength = 8;
-        String captchaChars = "ADEFGHJKLMNPRTUVWXY34678";
+        String captchaChars = "ADEFGHJKLMNPRTUVWXY23456789";
 
         // How to create captcha image
         Supplier<BufferedImage> generateCaptcha = () -> {

@@ -1,6 +1,7 @@
-package com.hyd.captcha.background;
+package com.hyd.captcha.filter;
 
 import com.hyd.captcha.ImageUtil;
+import com.hyd.captcha.ImageOperator;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;

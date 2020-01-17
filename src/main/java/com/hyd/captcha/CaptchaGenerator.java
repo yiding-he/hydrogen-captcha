@@ -1,6 +1,8 @@
 package com.hyd.captcha;
 
-import com.hyd.captcha.background.*;
+import com.hyd.captcha.charproperty.CharProperty;
+import com.hyd.captcha.charproperty.CharPropertyFactory;
+import com.hyd.captcha.charproperty.DefaultCharPropertyFactory;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
@@ -175,10 +177,10 @@ public class CaptchaGenerator {
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
         g.setComposite(AlphaComposite.Src);
 
-        if (charProperty.getStrikePaint() != null) {
-            g.translate(2, 2);
+        if (charProperty.getStrikeWidth() > 0 &&  charProperty.getStrikePaint() != null) {
+            g.translate(charProperty.getStrikeWidth() / 2, charProperty.getStrikeWidth() / 2);
             g.setPaint(charProperty.getStrikePaint());
-            g.setStroke(new BasicStroke(4));
+            g.setStroke(new BasicStroke(charProperty.getStrikeWidth()));
             g.draw(charShape);
         }
 

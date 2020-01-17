@@ -1,4 +1,4 @@
-package com.hyd.captcha.background;
+package com.hyd.captcha;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
