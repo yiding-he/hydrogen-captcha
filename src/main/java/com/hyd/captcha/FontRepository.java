@@ -33,7 +33,7 @@ public class FontRepository {
 
     public static Font pickRandomFont() {
         if (FONTS.isEmpty()) {
-            return null;
+            FONTS.add(Font.getFont("Dialog"));
         }
 
         if (FONTS.size() == 1) {
