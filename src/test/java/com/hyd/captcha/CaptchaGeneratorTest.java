@@ -18,7 +18,7 @@ public class CaptchaGeneratorTest extends JFrame {
     public static void main(String[] args) throws Exception {
 
         // FontRepository.loadFont("./sample-fonts/RobotoSlab.ttf");  // load single font
-        FontRepository.loadFonts("./sample-fonts/");            // load multiple fonts
+        // FontRepository.loadFonts("./sample-fonts/");            // load multiple fonts
 
         CaptchaGenerator captchaGenerator = new CaptchaGenerator();
         // captchaGenerator.setBackground(new GradientBackground(true));

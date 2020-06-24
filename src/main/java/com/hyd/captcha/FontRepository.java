@@ -32,8 +32,9 @@ public class FontRepository {
     }
 
     public static Font pickRandomFont() {
+
         if (FONTS.isEmpty()) {
-            FONTS.add(Font.getFont("Dialog"));
+            FONTS.add(getSystemDefaultFont());
         }
 
         if (FONTS.size() == 1) {
@@ -41,5 +42,9 @@ public class FontRepository {
         }
 
         return FONTS.get(RANDOM.nextInt(FONTS.size()));
+    }
+
+    private static Font getSystemDefaultFont() {
+        return new Font("Dialog", Font.PLAIN, 12);
     }
 }
